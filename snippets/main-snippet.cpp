@@ -21,7 +21,7 @@ int32_t main() {
 
     int tests = 1;
     cin >> tests;
-    for (int i = 1; i <= t; i++) runCase(i);
+    for (int i = 1; i <= tests; i++) runCase(i);
 
     return 0;
 }
