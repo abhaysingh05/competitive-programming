@@ -74,6 +74,10 @@ void runCase(int &testCase) {
         // cout << __builtin_clzll(n) << "\n";                   // counts no. of leading zeroes
         // long log2n = __builtin_clzll(1) - __builtin_clzll(n); // calculates log2(n) in constant time
         // cout << log2n << "\n";
+    } {
+        // already present in g++17 and in g++14 can use __gcd(a,b)
+        // lcm(2, 3);
+        // gcd(2, 3);
     }
 }
 

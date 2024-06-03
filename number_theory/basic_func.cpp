@@ -1,16 +1,16 @@
-long sum(long a, long b) {
-    long res = (a + b) % MOD;
+int64_t sum(int64_t a, int64_t b) {
+    int64_t res = (a + b) % MOD;
     if (res < 0) res += MOD;
     return res;
 }
-long mult(long a, long b) {
-    long res = a * b % MOD;
+int64_t mult(int64_t a, int64_t b) {
+    int64_t res = a * b % MOD;
     if (res < 0) res += MOD;
     return res;
 }
  
-long power(long a, long b) {
-    long res = 1;
+int64_t power(int64_t a, int64_t b) {
+    int64_t res = 1;
     while (b > 0) {
         if (b & 1) {
             res = mult(res, a);
@@ -21,6 +21,6 @@ long power(long a, long b) {
     return res;
 }
  
-long inv(long a) {
+int64_t inv(int64_t a) {
     return power(a, MOD - 2);
 }

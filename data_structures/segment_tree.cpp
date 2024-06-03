@@ -1,17 +1,10 @@
-#include <bits/stdc++.h>
-// https://codeforces.com/contest/1696/problem/D
-#define long long long int
-using namespace std;
-
 struct segtree {
-    typedef long item;
+    typedef int64_t item;
 
-    item zeroSum = LLONG_MAX;
-    // item zeroSum = 0;
+    item zeroSum = 0;
 
     item calc(item a, item b) {
-        return min(a, b);
-        // return a + b;
+        return a + b;
     }
 
     vector<item> sums;
@@ -63,55 +56,3 @@ struct segtree {
 
     item sum(int l, int r) { return sum(l, r, 0, 0, size); }
 };
-
-struct test {
-    void solve() {
-        int n;
-        cin >> n;
-        vector<int> a(n);
-        for (int i = 0; i < n; i++) {
-            cin >> a[i];
-        }
-        segtree stg, stl;
-        stg.init(n);
-        stl.init(n);
-        stg.set(0, 0);
-        stl.set(0, 0);
-        vector<int> sg = {-1, 0}, sl = {-1, 0};
-        for (int i = 1; i < n; i++) {
-            while (sl.back() >= 0 && a[sl.back()] > a[i]) {
-                stl.set(sl.back(), LLONG_MAX);
-                sl.pop_back();
-            }
-            while (sg.back() >= 0 && a[sg.back()] < a[i]) {
-                stg.set(sg.back(), LLONG_MAX);
-                sg.pop_back();
-            }
-
-            long x;
-            if (a[i] < a[i - 1]) {
-                x = stg.sum(sl.back() + 1, n) + 1;
-            } else {
-                x = stl.sum(sg.back() + 1, n) + 1;
-            }
-            stg.set(i, x);
-            stl.set(i, x);
-            sg.push_back(i);
-            sl.push_back(i);
-        }
-        cout << stg.sum(n - 1, n) << "\n";
-    }
-};
-
-int main() {
-    ios::sync_with_stdio(false);
-
-    int n;
-    cin >> n;
-    for (int i = 0; i < n; i++) {
-        test t;
-        t.solve();
-    }
-
-    return 0;
-}

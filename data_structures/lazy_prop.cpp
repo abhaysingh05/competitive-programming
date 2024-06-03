@@ -1,5 +1,5 @@
 struct lazySeg {
-    typedef long item;
+    typedef int64_t item;
 
     // item zeroSum = inf;
     item zeroSum = 0LL;
@@ -25,8 +25,8 @@ struct lazySeg {
     void propogate(int n, int len) {
         // len = 1; // for multiplication modify
         sums[n] = modify(len * adds[n], sums[n]);
-        adds[2 * n + 1] = modify(adds[n], adds[2 * n + 1]);
-        adds[2 * n + 2] = modify(adds[n], adds[2 * n + 2]);
+        if (2 * n + 1 < 2 * size) adds[2 * n + 1] = modify(adds[n], adds[2 * n + 1]);
+        if (2 * n + 2 < 2 * size) adds[2 * n + 2] = modify(adds[n], adds[2 * n + 2]);
         adds[n] = zeroAdd;
     }
 
@@ -95,9 +95,6 @@ struct lazySeg {
     void init(vector<item> a) {
         int n = a.size();
         init(n);
-        size = 1;
-        while (size < n) size *= 2;
-        sums.assign(2 * size, zeroSum);
         for (int i = 0; i < n; i++) {
             sums[size - 1 + i] = a[i];
         }
@@ -111,7 +108,7 @@ struct lazySeg {
     }
 
     item get(int i) {
-        get(i, 0, 0, size);
+        return get(i, 0, 0, size);
     }
 
     item sum(int l, int r) {

@@ -9,23 +9,18 @@
 8. Function calc_c: This function computes the binomial coefficient "n choose k" modulo mod using precomputed factorials and their inverses.
 */
 #include <bits/stdc++.h>
-// https://codeforces.com/contest/1761/problem/D
-#define long long long int
-using namespace std;
-
 int mod = 1000000007;
-
 struct mint {
     int value = 0;
 
     constexpr mint() : value() {}
 
-    mint(const long &x) {
+    mint(const int64_t &x) {
         value = normalize(x);
     }
 
-    static long normalize(const long &x) {
-        long v = x % mod;
+    static int64_t normalize(const int64_t &x) {
+        int64_t v = x % mod;
         if (v < 0) v += mod;
         return v;
     }
@@ -34,12 +29,12 @@ struct mint {
 
     mint operator+(const mint &x) { return value + x.value; };
 
-    mint operator*(const mint &x) { return (long) value * x.value; };
+    mint operator*(const mint &x) { return (int64_t) value * x.value; };
 
     void operator+=(const mint &x) { value = normalize(value + x.value); };
 };
 
-mint power(mint a, long b) {
+mint power(mint a, int64_t b) {
     mint res = 1;
     while (b > 0) {
         if (b & 1) {
@@ -84,7 +79,6 @@ mint calc_c(int n, int k) {
     res = res * inv_fact(n - k);
     return res;
 }
-
 
 int main() {
     ios::sync_with_stdio(false);
