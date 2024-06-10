@@ -1,8 +1,8 @@
 struct SplayTree {
     struct Node {
         int ch[2] = {0, 0}, p = 0;
-        long self = 0, path = 0; // Path aggregates
-        long sub = 0, vir = 0;   // Subtree aggregates
+        int64_t self = 0, path = 0; // Path aggregates
+        int64_t sub = 0, vir = 0;   // Subtree aggregates
         bool flip = 0;           // Lazy tags
     };
     vector<Node> T;
@@ -37,8 +37,7 @@ struct SplayTree {
         auto dir = [&](int x) {
             int p = T[x].p;
             if (!p) return -1;
-            return T[p].ch[0] == x ? 0 : T[p].ch[1] == x ? 1
-                                                         : -1;
+            return T[p].ch[0] == x ? 0 : (T[p].ch[1] == x ? 1 : -1);
         };
         auto rotate = [&](int x) {
             int y = T[x].p, z = T[y].p, dx = dir(x), dy = dir(y);
@@ -105,21 +104,21 @@ struct LinkCut : SplayTree {
     }
 
     // Query subtree of u where v is outside the subtree.
-    long Subtree(int u, int v) {
+    int64_t Subtree(int u, int v) {
         reroot(v);
         access(u);
         return T[u].vir + T[u].self;
     }
 
     // Query path [u..v]
-    long Path(int u, int v) {
+    int64_t Path(int u, int v) {
         reroot(u);
         access(v);
         return T[v].path;
     }
 
     // Update vertex u with value v
-    void Update(int u, long v) {
+    void Update(int u, int64_t v) {
         access(u);
         T[u].self = v;
         pull(u);
