@@ -1,173 +1,142 @@
-struct Rollback_DSU {
-    // Time-Complexity is not Ackermann-Func (No Path Compression)
-    vector<int> par;
-    vector<pair<int, int>> changes;
+struct RollbackUF {
+    vector<int> e;
+    vector<pair<int, int>> st;
 
-    Rollback_DSU(int n) : par(n, -1) {}
+    RollbackUF(int n) : e(n, -1) {}
 
-    int find(int a) {
-        while (par[a] >= 0) a = par[a];
-        return a;
+    int get_size(int x) { return -e[find(x)]; }
+
+    int find(int x) { return e[x] < 0 ? x : find(e[x]); }
+
+    int time() { return st.size(); }
+
+    void rollback(int t) {
+        for (int i = time(); i-- > t;)
+            e[st[i].first] = st[i].second;
+        st.resize(t);
     }
 
-    int get_size(int a) { return -par[find(a)]; } // O(log n)
-
-    bool merge(int a, int b) {
-        int pa = find(a), pb = find(b);
-        if (pa == pb) return false;
-        if (par[pa] > par[pb]) swap(pa, pb);
-        changes.push_back({pa, par[pa]});
-        changes.push_back({pb, par[pb]});
-        // Make smaller pb a child of larger pa.
-        par[pa] += par[pb];
-        par[pb] = pa;
+    bool join(int a, int b) {
+        a = find(a), b = find(b);
+        if (a == b) return false;
+        if (e[a] > e[b]) swap(a, b);
+        st.push_back({a, e[a]});
+        st.push_back({b, e[b]});
+        e[a] += e[b];
+        e[b] = a;
         return true;
     }
-
-    int save() { return changes.size(); }
-
-    void rollback(int version) {
-        while (changes.size() > version) {
-            auto &v = changes.back();
-            par[v.first] = v.second;
-            changes.pop_back();
-        }
-    }
 };
 
-struct edge {
-    int src, dst, wt, id;
-};
-
-struct skew_heap {
-    struct node {
-        node *ch[2];
-        edge key;
-        int delta;
-        int id;
-    } * root;
-    skew_heap() : root(0) {}
-    void propagate(node *a) {
-        a->key.wt += a->delta;
-        if (a->ch[0]) a->ch[0]->delta += a->delta;
-        if (a->ch[1]) a->ch[1]->delta += a->delta;
-        a->delta = 0;
-    }
-    node *merge(node *a, node *b) {
-        if (!a || !b) return a ? a : b;
-        propagate(a);
-        propagate(b);
-        if (a->key.wt > b->key.wt) swap(a, b);
-        a->ch[1] = merge(b, a->ch[1]);
-        swap(a->ch[0], a->ch[1]);
-        return a;
-    }
-    void push(edge key) {
-        node *n = new node();
-        n->ch[0] = n->ch[1] = 0;
-        n->id = key.id;
-        n->key = key;
-        n->delta = 0;
-        root = merge(root, n);
-    }
-    void pop() {
-        propagate(root);
-        root = merge(root->ch[0], root->ch[1]);
-    }
-    pair<edge, int> top() {
-        propagate(root);
-        return {root->key, root->id};
-    }
-    bool empty() {
-        return !root;
-    }
-    void add(int delta) {
-        root->delta += delta;
-    }
-    void merge(skew_heap x) {
-        root = merge(root, x.root);
-    }
-};
-
-struct minimum_arborescence {
-
-    struct fat_node {
-        int node, dsu_ver;
-        vector<int> edges_id;
+struct DMST {
+    // Time Complexity : O(m * log(n))
+    struct Edge {
+        int a, b;
+        int64_t wt;
     };
 
-    int n, m = 0;
-    vector<edge> edges;
-    vector<edge> T;
-    int mst_wt = 0;
+    int n;
+    vector<Edge> Edges;
 
-    minimum_arborescence(int _n) : n(_n) {}
+    DMST(int n) : n(n) {}
 
-    void add_edge(int src, int dst, int wt) {
-        edges.push_back({src, dst, wt, m++});
+    void add_edge(int a, int b, int64_t wt) {
+        Edges.push_back({a, b, wt});
     }
 
-    int find_mst(int r) {
+    struct Node { /// lazy skew heap node
+        int key;
+        int id;
+        Node *l, *r;
+        int64_t delta;
+        void prop() {
+            key += delta;
+            if (l) l->delta += delta;
+            if (r) r->delta += delta;
+            delta = 0;
+        }
+        pair<int, int> top() {
+            prop();
+            return {key, id};
+        }
+    };
 
-        vector<skew_heap> heap(n);
-        vector<int> seen(n, -1), seq(n, -1);
-        Rollback_DSU uf(n);
-        vector<fat_node> cycles;
+    Node *merge(Node *a, Node *b) {
+        if (!a || !b) return a ?: b;
+        a->prop(), b->prop();
+        if (a->key > b->key) swap(a, b);
+        swap(a->l, (a->r = merge(b, a->r)));
+        return a;
+    }
 
-        for (auto e : edges) heap[e.dst].push(e);
-        seen[r] = r;
+    void pop(Node *&a) {
+        a->prop();
+        a = merge(a->l, a->r);
+    }
+
+    pair<int64_t, vector<int>> dmst(int n, int root, vector<Edge> &E) {
+        vector<Node *> heap(n);
+        vector<int> seen(n, -1), pe(n, -1);
+        seen[root] = root;
+        RollbackUF uf(n);
+        vector<tuple<int, int, vector<int>>> cycles; // (merged vertex, uf time, cycle eids)
+
+        for (int i = 0; i < E.size(); ++i) {
+            int u = E[i].b;
+            heap[u] = merge(heap[u], new Node{E[i].wt, i});
+        }
 
         for (int s = 0; s < n; ++s) {
             vector<int> path;
+
             for (int u = s; seen[u] < 0;) {
-                if (heap[u].empty()) return -1;
-                auto [min_e, _id] = heap[u].top();
-                heap[u].pop();
-                int v = uf.find(edges[_id].src);
-                if (v == u) continue; // Self Loop
-                if (!heap[u].empty()) heap[u].add(-min_e.wt);
-                path.push_back(_id);
+                if (!heap[u]) return {-1, {}};
+                auto [w, eid] = heap[u]->top();
+                pop(heap[u]);
+                int pu = uf.find(E[eid].a);
+                if (pu == u) continue; // Self-loop, ignore.
+                if (heap[u]) heap[u]->delta -= w;
+                path.push_back(eid);
                 seen[u] = s;
-                u = v;
-                if (seen[u] == s) {
-                    // Contracting Cycles in fatNode
-                    int dsu_version = uf.save();
+                u = pu;
+                if (seen[u] == s) { // Found a cycle of >= 2 vertices, contract!
+                    int dsuTime = uf.time();
                     vector<int> cycle;
-                    skew_heap new_heap;
                     while (true) {
-                        int w = path.back();
-                        cycle.push_back(w);
-                        int v = uf.find(edges[w].dst);
-                        if (!uf.merge(u, v)) break;
-                        new_heap.merge(heap[v]);
+                        cycle.push_back(path.back());
+                        int v = uf.find(E[path.back()].b);
+                        path.pop_back();
+                        if (!uf.join(u, v)) break;
+                        heap[u] = merge(heap[u], heap[v]);
                     }
                     u = uf.find(u);
-                    heap[u] = new_heap;
                     seen[u] = -1;
-                    cycles.push_back({u, dsu_version, move(cycle)});
+                    cycles.emplace_back(u, dsuTime, move(cycle));
                 }
             }
-            // Found Path from root to s.
-            for (int &_id : path) {
-                seq[uf.find(edges[_id].dst)] = _id;
-            }
+            // Found path from root to s.
+            for (int eid : path) pe[uf.find(E[eid].b)] = eid;
         }
-        // Decontraction
+        // Expand the cycles backwards to resolve the in-edges in original graph.
         while (!cycles.empty()) {
-            auto big_node = cycles.back();
-            int in_edge = seq[big_node.node];
-            uf.rollback(big_node.dsu_ver);
+            auto &[u, t, cycle] = cycles.back();
+            int newInEdge = pe[u];
+            uf.rollback(t);
             // Restore in-edges in cycle except for the new in-edge.
-            for (int _id : big_node.edges_id) seq[uf.find(edges[_id].dst)] = _id;
-            seq[uf.find(edges[in_edge].dst)] = in_edge;
+            for (int eid : cycle) pe[uf.find(E[eid].b)] = eid;
+            pe[uf.find(E[newInEdge].b)] = newInEdge;
             cycles.pop_back();
         }
+        int64_t cost = 0;
         for (int i = 0; i < n; ++i) {
-            if (i != r) {
-                mst_wt += edges[seq[i]].wt;
+            if (i != root) {
+                cost += E[pe[i]].wt;
             }
         }
-        for (auto &_id : seq) T.push_back(edges[_id]);
-        return mst_wt;
+        return {cost, pe};
+    }
+
+    pair<int64_t, vector<int>> find_mst(int r) {
+        return dmst(n, r, Edges);
     }
 };

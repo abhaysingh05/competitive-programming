@@ -16,7 +16,7 @@ struct DSU {
     int count() {
         return c; // connected components
     }
-    int merge(int i, int j) {
+    int join(int i, int j) {
         if ((i = find(i)) == (j = find(j)))
             return -1;
         else

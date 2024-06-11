@@ -1,36 +1,29 @@
-struct Rollback_DSU {
-    // Time-Complexity is not Ackermann-Func (No Path Compression)
-    vector<int> par;
-    vector<pair<int, int>> changes;
+struct RollbackUF {
+    vector<int> e;
+    vector<pair<int, int>> st;
 
-    Rollback_DSU(int n) : par(n, -1) {}
+    RollbackUF(int n) : e(n, -1) {}
 
-    int find(int a) {
-        while (par[a] >= 0) a = par[a];
-        return a;
+    int get_size(int x) { return -e[find(x)]; }
+
+    int find(int x) { return e[x] < 0 ? x : find(e[x]); }
+
+    int time() { return st.size(); }
+
+    void rollback(int t) {
+        for (int i = time(); i-- > t;)
+            e[st[i].first] = st[i].second;
+        st.resize(t);
     }
 
-    int get_size(int a) return -par[find(a)]; // O(log n)
-
-    bool merge(int a, int b) {
-        int pa = get(a), pb = get(b);
-        if (pa == pb) return false;
-        if (par[pa] > par[pb]) swap(pa, pb);
-        changes.push_back(pa, par[pa]);
-        changes.push_back(pb, par[pb]);
-        // Make smaller pb a child of larger pa.
-        par[pa] += par[pb];
-        par[pb] = pa;
+    bool join(int a, int b) {
+        a = find(a), b = find(b);
+        if (a == b) return false;
+        if (e[a] > e[b]) swap(a, b);
+        st.push_back({a, e[a]});
+        st.push_back({b, e[b]});
+        e[a] += e[b];
+        e[b] = a;
         return true;
-    }
-
-    int save() return changes.size();
-
-    void rollback(int version) {
-        while (changes.size() > version) {
-            auto &v = changes.back();
-            par[v.first] = v.second;
-            changes.pop_back();
-        }
     }
 };
