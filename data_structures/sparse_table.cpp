@@ -3,14 +3,15 @@ precalc: O(n*log(n))
 query: O(1)
 */
 
+template <typename T>
 struct sparse {
     int n;
     int k;
-    vector<vector<int64_t>> sp;
+    vector<vector<T>> sp;
 
     int logg(int n) { return n ? __builtin_clz(1) - __builtin_clz(n) : -1; }
 
-    int64_t argmin(int64_t a, int64_t b) { return min(a, b); }
+    T argmin(T a, T b) { return min(a, b); }
 
     void precalc() {
         for (int j = 1; j <= k; j++) {
@@ -20,17 +21,17 @@ struct sparse {
         }
     }
 
-    void init(vector<int64_t> a) {
+    void init(vector<T> a) {
         n = a.size();
         k = logg(n);
-        sp.resize(n, vector<int64_t>(k + 1));
+        sp.resize(n, vector<T>(k + 1));
         for (int i = 0; i < n; i++) {
             sp[i][0] = a[i];
         }
         precalc();
     }
 
-    int64_t calc(int l, int r) {
+    T calc(int l, int r) {
         int p = logg(r - l);
         return argmin(sp[l][p], sp[r - (1 << p)][p]);
     }

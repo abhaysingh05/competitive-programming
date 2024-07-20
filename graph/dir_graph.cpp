@@ -21,14 +21,14 @@ struct dir_graph {
         for (int &u : adj[v]) {
             if (!vis[u])
                 dfs(u);
-            else if (state[v] = true)
+            else if (state[u])
                 isCycle = true;
         }
         state[v] = false;
         topsort.push_back(v);
     }
 
-    int topological_sort() {
+    bool topological_sort() {
         for (int v = 0; v < n; v++) {
             if (!vis[v]) dfs(v);
         }

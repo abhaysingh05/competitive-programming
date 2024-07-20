@@ -1,11 +1,11 @@
 int64_t sum(int64_t a, int64_t b) {
-    int64_t res = (a + b) % MOD;
-    if (res < 0) res += MOD;
+    int64_t res = (a + b) % mod;
+    if (res < 0) res += mod;
     return res;
 }
 int64_t mult(int64_t a, int64_t b) {
-    int64_t res = a * b % MOD;
-    if (res < 0) res += MOD;
+    int64_t res = a * b % mod;
+    if (res < 0) res += mod;
     return res;
 }
  
@@ -22,5 +22,5 @@ int64_t power(int64_t a, int64_t b) {
 }
  
 int64_t inv(int64_t a) {
-    return power(a, MOD - 2);
+    return power(a, mod - 2);
 }

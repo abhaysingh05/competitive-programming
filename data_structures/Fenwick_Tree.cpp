@@ -1,11 +1,12 @@
+template <typename T>
 struct fenwick {
-    vector<int64_t> f;
+    vector<T> f;
 
-    void init(int n) {
+    fenwick(int n) {
         f.assign(n + 1, 0);
     }
 
-    int64_t sum(int r) { // exclusive
+    T sum(int r) { // exclusive
         if (r == 0)
             return 0;
         r--;
@@ -15,7 +16,7 @@ struct fenwick {
         return result;
     }
 
-    int64_t sum(int l, int r) {
+    T sum(int l, int r) {
         return sum(r) - sum(l);
     }
 
@@ -24,7 +25,7 @@ struct fenwick {
             f[i] += x;
     }
 
-    void init(vector<int64_t> a) {
+    fenwick(vector<T> a) {
         int n = a.size();
         init(n);
         for (int i = 0; i < n; i++) {

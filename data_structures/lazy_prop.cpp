@@ -1,24 +1,24 @@
+template <typename T>
 struct lazySeg {
-    typedef int64_t item;
 
-    // item zeroSum = inf;
-    item zeroSum = 0LL;
+    // T zeroSum = inf;
+    T zeroSum = 0LL;
 
-    // item zeroAdd = 1LL;
-    item zeroAdd = 0LL;
+    // T zeroAdd = 1LL;
+    T zeroAdd = 0LL;
 
-    item calc(item a, item b) {
+    T calc(T a, T b) {
         // return min(a, b);
         return a + b;
     }
 
-    item modify(item a, item b) {
+    T modify(T a, T b) {
         // return a * b;
         return a + b;
     }
 
-    vector<item> sums;
-    vector<item> adds;
+    vector<T> sums;
+    vector<T> adds;
 
     int size;
 
@@ -30,7 +30,7 @@ struct lazySeg {
         adds[n] = zeroAdd;
     }
 
-    void set(int i, item x, int n, int L, int R) {
+    void set(int i, T x, int n, int L, int R) {
         if (R == L + 1) {
             sums[n] = x;
             adds[n] = zeroAdd;
@@ -46,7 +46,7 @@ struct lazySeg {
         sums[n] = calc(sums[2 * n + 1], sums[2 * n + 2]);
     }
 
-    item get(int i, int n, int L, int R) {
+    T get(int i, int n, int L, int R) {
         if (R == L + 1) {
             if (adds[n] != zeroAdd) propogate(n, R - L);
             return sums[n];
@@ -60,7 +60,7 @@ struct lazySeg {
         }
     }
 
-    item sum(int l, int r, int n, int L, int R) {
+    T sum(int l, int r, int n, int L, int R) {
         if (l >= R || L >= r) return zeroSum;
         if (L >= l && R <= r) {
             if (adds[n] != zeroAdd) propogate(n, R - L);
@@ -71,7 +71,7 @@ struct lazySeg {
         return calc(sum(l, r, 2 * n + 1, L, M), sum(l, r, 2 * n + 2, M, R));
     }
 
-    void add(int l, int r, item v, int n, int L, int R) {
+    void add(int l, int r, T v, int n, int L, int R) {
         if (l >= R || L >= r) return;
         if (L >= l && R <= r) {
             adds[n] = modify(adds[n], v);
@@ -85,14 +85,14 @@ struct lazySeg {
         sums[n] = modify(calc(sums[2 * n + 1], sums[2 * n + 2]), adds[n]);
     }
 
-    void init(int n) {
+    lazySeg(int n) {
         size = 1;
         while (size < n) size *= 2;
         sums.assign(2 * size, zeroSum);
         adds.assign(2 * size, zeroAdd);
     }
 
-    void init(vector<item> a) {
+    lazySeg(vector<T> a) {
         int n = a.size();
         init(n);
         for (int i = 0; i < n; i++) {
@@ -103,19 +103,19 @@ struct lazySeg {
         }
     }
 
-    void set(int i, item x) {
+    void set(int i, T x) {
         set(i, x, 0, 0, size);
     }
 
-    item get(int i) {
+    T get(int i) {
         return get(i, 0, 0, size);
     }
 
-    item sum(int l, int r) {
+    T sum(int l, int r) {
         return sum(l, r, 0, 0, size);
     }
 
-    void add(int l, int r, item v) {
+    void add(int l, int r, T v) {
         add(l, r, v, 0, 0, size);
     }
 };

@@ -3,7 +3,7 @@ struct undir_graph {
     int n; // 0 - based
     vector<vector<int>> adj;
     vector<int> T_in, label, up, arti_points;
-    vector<bool> vis, state, mark;
+    vector<bool> vis, mark;
     map<pair<int, int>, int> arti_label;
     stack<pair<int, int>> arti_buff;
     stack<int> buff;
@@ -17,16 +17,14 @@ struct undir_graph {
         adj[v].push_back(u);
     }
 
-    void dfs(int v) {
+    void dfs1(int v, int par) {
         vis[v] = true;
-        state[v] = true;
         for (int u : adj[v]) {
             if (!vis[u])
-                dfs(u);
-            else if (state[u])
+                dfs(u, v);
+            else if (u != par)
                 cycle = true;
         }
-        state[v] = false;
     }
 
     void dfs(int v, int p) {
@@ -79,7 +77,7 @@ struct undir_graph {
         for (int u = 0; u < n; u++) {
             if (!vis[u]) {
                 res++;
-                dfs(u);
+                dfs1(u, -1);
             }
         }
         return res;
