@@ -85,14 +85,14 @@ struct lazySeg {
         sums[n] = modify(calc(sums[2 * n + 1], sums[2 * n + 2]), adds[n]);
     }
 
-    lazySeg(int n) {
+    void init(int n) {
         size = 1;
         while (size < n) size *= 2;
         sums.assign(2 * size, zeroSum);
         adds.assign(2 * size, zeroAdd);
     }
 
-    lazySeg(vector<T> a) {
+    void init(vector<T> a) {
         int n = a.size();
         init(n);
         for (int i = 0; i < n; i++) {
