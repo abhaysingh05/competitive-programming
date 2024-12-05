@@ -32,13 +32,13 @@ struct segtree {
         return calc(sum(l, r, 2 * n + 1, L, M), sum(l, r, 2 * n + 2, M, R));
     }
 
-    segtree(int n) {
+    void init(int n) {
         size = 1;
         while (size < n) size *= 2;
         sums.assign(2 * size, zeroSum);
     }
 
-    segtree(vector<T> a) {
+    void init(vector<T> a) {
         int n = a.size();
         init(n);
         size = 1;
